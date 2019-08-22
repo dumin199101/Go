@@ -21,6 +21,7 @@ import (
           字符串拼接
           多行字符串
       8.类型转换
+      9.常量
 
 
 
@@ -73,6 +74,9 @@ func ChangeType() {
 	fmt.Println(int16(i2))
 }
 
+//声明常量
+const homeaddr string = "北京市"
+
 func main() {
 	v1, _ := GetData()
 	_, v2 := GetData()
@@ -84,5 +88,6 @@ func main() {
 	fmt.Println(btoi(true))
 	fmt.Println(str, str1, str2, str3)
 	ChangeType()
+	fmt.Println(homeaddr)
 
 }
