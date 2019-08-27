@@ -36,6 +36,23 @@ func main() {
 		fmt.Println()
 	}
 
+	//类似while循环
+	var i = 1
+	for i < 10 {
+		fmt.Println(i)
+		i++
+	}
+
+	//while无限循环
+	var n = 1
+	for {
+		if n > 3 {
+			break
+		}
+		fmt.Println("无限循环", n)
+		n++
+	}
+
 	//遍历数组
 	for key, value := range [5]int{100, 200, 300, 400, 500} {
 		fmt.Printf("key:%d,value:%d", key, value)
@@ -96,6 +113,8 @@ OuterLoop:
 		}
 	}
 
+	fmt.Println("------------------------")
+
 OuterLoop2:
 	for i := 0; i < 2; i++ {
 		for j := 0; j < 5; j++ {
@@ -105,6 +124,17 @@ OuterLoop2:
 				continue OuterLoop2
 			}
 		}
+	}
+
+	fmt.Println("--------------------")
+	for i := 0; i < 10; i++ {
+		if i%2 == 0 {
+			continue
+		}
+		if i > 5 {
+			break
+		}
+		println(i)
 	}
 
 }
