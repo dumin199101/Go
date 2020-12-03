@@ -17,12 +17,12 @@ Go的数据类型分为四大类：
         number:
 
            int8,int16,int32,int64,uint8,uint16,uint32,uint64
-           int,uint,uintptr
+           int(32位系统：int32,64位系统int64,默认),uint,uintptr
            rune(int32),byte(uint8)
         
            取模余数的正负号总是取决于被除数，除法运算，整数相除，舍弃小数部分，浮点相除，保留小数部分
         
-           float32,float64
+           float32,float64(默认)
            
            complex64,complex128
            
