@@ -22,4 +22,9 @@ func main() {
 		fmt.Println(key, value)
 	}
 
+	slice3 := []string{"hello", "world", "java"}
+	for key, value := range slice3 {
+		fmt.Println(key, value)
+	}
+
 }
