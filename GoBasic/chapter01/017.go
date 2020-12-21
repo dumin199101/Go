@@ -33,4 +33,12 @@ func main() {
 		fmt.Println(key, value)
 	}
 
+	//二维数组
+	arr5 := [...][3]int{{1, 2, 3}, {4, 5, 6}}
+	for key, value := range arr5 {
+		for k, v := range value {
+			fmt.Println(arr5[key], k, v)
+		}
+	}
+
 }
