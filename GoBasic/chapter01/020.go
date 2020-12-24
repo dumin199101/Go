@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"strconv"
 )
 
 type Student struct {
@@ -40,6 +41,29 @@ func (p Person) setAge(age int8) {
 
 func (p *Person) setAge2(age int8) {
 	p.age = age
+}
+
+func (p *Person) String() string {
+	str := "[" + p.name + "," + strconv.Itoa(int(p.age)) + "]"
+	return str
+}
+
+// 结构体匿名字段
+type Dog struct {
+	string
+	int8
+}
+
+//结构体嵌套
+type Player struct {
+	name string
+	age  int8
+}
+
+type BasketballPlayer struct {
+	gender  string
+	address string
+	Player
 }
 
 func main() {
@@ -161,5 +185,28 @@ func main() {
 	fmt.Println(person2.age) //0
 	person2.setAge2(20)
 	fmt.Println(person2.age) //20
+
+	//结构体重写String方法,fmt.Println会调用String方法返回值
+	fmt.Println(&person2)
+
+	//结构体匿名字段
+	dog := Dog{
+		"旺财",
+		2,
+	}
+
+	fmt.Printf("%v的年龄是%d岁\n", dog.string, dog.int8)
+
+	//结构体嵌套,类似于继承
+	basketballPlayer := BasketballPlayer{
+		gender:  "男",
+		address: "美国洛杉矶",
+		Player: Player{
+			name: "james",
+			age:  22,
+		},
+	}
+
+	fmt.Printf("篮球运动员的姓名是%v,年龄是%d,性别是%v,地址是%v\n", basketballPlayer.name, basketballPlayer.age, basketballPlayer.gender, basketballPlayer.address)
 
 }
