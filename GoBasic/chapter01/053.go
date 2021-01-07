@@ -35,4 +35,11 @@ func main() {
 
 	defer Db1.Close()
 
+	for _, value := range user {
+		fmt.Println(value.UserId)
+		fmt.Println(value.Username)
+		fmt.Println(value.Sex)
+		fmt.Println(value.Email)
+	}
+
 }
