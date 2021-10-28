@@ -11,6 +11,15 @@ func TestAdd(t *testing.T) {
 	if res == 3 {
 		t.Logf("测试通过，期望值：%d,实际值：%d", 3, res)
 	} else {
-		t.Fatalf("测试失败，期望值：%d,实际值：%d", 3, res)
+		t.Fatalf("测试失败")
+	}
+}
+
+func TestSub(t *testing.T) {
+	res := sub(10, 3)
+	if res == 7 {
+		t.Logf("测试通过，期望值：%d,实际值：%d", 7, res)
+	} else {
+		t.Fatalf("测试失败")
 	}
 }

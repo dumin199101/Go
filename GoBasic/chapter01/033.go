@@ -31,6 +31,7 @@ func main() {
 
 	close(channelLions)
 	for value := range channelLions {
+		// 接口多态，通过断言转化为原始类型
 		if v, ok := value.(Lions); ok {
 			info := v.name + "," + strconv.Itoa(v.age) + "," + v.address
 			fmt.Println(info)

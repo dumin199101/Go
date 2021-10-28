@@ -18,6 +18,7 @@ func Php() {
 	num := 10
 	num2 := 0
 	fmt.Println(num / num2)
+	fmt.Println("Hello,我会执行么？")
 }
 
 func Python() {

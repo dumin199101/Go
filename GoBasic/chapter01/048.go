@@ -37,7 +37,14 @@ func test_struct(a interface{}) {
 		fmt.Printf("字段的名称%s,字段的类型%v,标签的值是：%s\n", t.Field(i).Name, t.Field(i).Type, t.Field(i).Tag)
 		//reflect.Value类型转换interface{},此时应注意属性的访问权限：cannot return value obtained from unexported field or method
 		ivalue := value.Field(i).Interface()
-		fmt.Println("val :", ivalue)
+		if v, ok := ivalue.(string); ok {
+			fmt.Println("[string]val :", v)
+		}
+
+		if v, ok := ivalue.(int); ok {
+			fmt.Println("[int]val :", v)
+		}
+
 		//标签值
 		s := t.Field(i).Tag.Get("json")
 		fmt.Printf("标签%s的值为%s\n", t.Field(i).Tag, s)

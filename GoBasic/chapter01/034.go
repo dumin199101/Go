@@ -41,9 +41,10 @@ func main() {
 
 	for {
 		//如果channel关闭，且数据都已读取完毕，再读，第二个参数就会返回false
-		_, ok := <-channelBool
+		v, ok := <-channelBool
 		if !ok {
 			break
 		}
+		fmt.Printf("读取到结束标识%t,程序运行结束\n", v)
 	}
 }

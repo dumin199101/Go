@@ -6,7 +6,7 @@ import (
 )
 
 func main() {
-	// select 解决管道数据阻塞问题
+	// select 解决管道数据阻塞问题,遍历数据不用关闭管道
 
 	intChannel := make(chan int, 10)
 	strChannel := make(chan string, 10)

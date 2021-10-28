@@ -25,14 +25,14 @@ func run(ctx context.Context) {
 }
 
 func main() {
-	// context包的使用
+	// context包的使用:控制协程的结束
 	//Background()主要用于main函数、初始化以及测试代码中，作为Context这个树结构的最顶层的Context，也就是根Context。
 	//WithCancel返回带有新Done通道的父节点的副本。当调用返回的cancel函数或当关闭父上下文的Done通道时，将关闭返回上下文的Done通道，无论先发生什么情况。
 	ctx, cancel := context.WithCancel(context.Background())
 	wg2.Add(1)
 	go run(ctx)
 	//3s后主动结束go协程
-	time.Sleep(time.Second * 3)
+	time.Sleep(time.Second * 10)
 	cancel()
 	wg2.Wait()
 	fmt.Println("主线程结束")

@@ -32,6 +32,22 @@ func test03() {
 	defer fmt.Println("Go")
 }
 
+// 函数作为形参或者返回值
+func addV() func(int) int {
+	n := 10
+	return func(v int) int {
+		n = n + v
+		return n
+	}
+}
+
+// 变量作用域
+var name = "zhangsan" //全局变量，整个包有效
+func printName() {
+	name := "lisi" //局部变量，函数内部有效
+	fmt.Println(name)
+}
+
 func main() {
 	fmt.Println("main函数执行")
 	//函数
@@ -71,6 +87,29 @@ func main() {
 	fmt.Println("***********************")
 	//defer栈，函数执行完再执行的操作，先入后出
 	test03()
+
+	fmt.Println("*************************")
+
+	//闭包
+	sumV := addV()
+
+	sum := sumV(1)
+	fmt.Println("第1次累加后的值：", sum)
+	sum = sumV(2)
+	fmt.Println("第2次累加后的值：", sum)
+	sum = sumV(3)
+	fmt.Println("第3次累加后的值：", sum)
+
+	//变量作用域
+	printName()
+	fmt.Println(name)
+
+	var i int                 // 局部变量
+	for i := 1; i < 10; i++ { //i变量只在代码块内有效
+		fmt.Println("内部i=", i)
+	}
+
+	fmt.Println("外部：i=", i)
 
 }
 
