@@ -50,7 +50,9 @@ func main() {
 		defer wg.Done()
 		for {
 			i++
-			fmt.Println(<-ticker.C)
+			//fmt.Println(<-ticker.C)
+			<-ticker.C
+			fmt.Println(i)
 			if i == 5 {
 				break
 			}
