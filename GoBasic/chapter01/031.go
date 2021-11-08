@@ -31,7 +31,7 @@ func main() {
 	}
 
 	//等待5s，让协程执行完毕
-	time.Sleep(time.Second * 5)
+	time.Sleep(time.Second * 10)
 
 	fmt.Println("计算1-20的阶乘中...")
 
