@@ -1,0 +1,9 @@
+syntax = "proto3";
+package prototest;
+option go_package = "./";
+message Person {
+   string name = 1;
+   int32 age = 2;
+   repeated int32 height = 3;
+   string motto = 4;  //格言
+}
