@@ -105,7 +105,15 @@ go mod vendor   //此命令会将build阶段需要的所有依赖包放到主模
 ```
 
 
-## GRPC
+## RPC
 
-GRPC是一个高性能、开源、通用的RPC框架，底层是通讯协议，采用Protobuf数据序列化协议。
+### go实现rpc
+
+- golang官方的net/rpc库使用encoding/gob进行编解码，支持tcp和http数据传输方式，由于其他语言不支持gob编解码方式，所以golang的RPC只支持golang开发的服务器与客户端之间的交互.[gob流]
+
+- 官方还提供了net/rpc/jsonrpc库实现RPC方法，jsonrpc采用encoding/json进行数据编解码，因而支持跨语言调用，目前jsonrpc库是基于tcp协议实现的，暂不支持http传输方式。[json字符串]
+
+###gRPC
+
+gRPC是一个高性能、开源、通用的RPC框架，底层是通讯协议，采用Protobuf数据序列化协议[protobuf]。
 
