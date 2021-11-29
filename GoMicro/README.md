@@ -107,13 +107,324 @@ go mod vendor   //此命令会将build阶段需要的所有依赖包放到主模
 
 ## RPC
 
+### golang实现rpc必备条件
+
+ golang写RPC程序，必须符合4个基本条件，不然RPC用不了
+
+	结构体字段首字母要大写，可以别人调用
+
+	函数名必须首字母大写
+
+	函数第一参数是接收参数，第二个参数是返回给客户端的参数，必须是指针类型
+
+	函数还必须有一个返回值error
+
 ### go实现rpc
 
 - golang官方的net/rpc库使用encoding/gob进行编解码，支持tcp和http数据传输方式，由于其他语言不支持gob编解码方式，所以golang的RPC只支持golang开发的服务器与客户端之间的交互.[gob流]
 
+#### Server端
+
+```go
+package main
+
+import (
+	"io"
+	"net/http"
+	"net/rpc"
+)
+
+// 参数
+type Params struct {
+	Width  int
+	Height int
+}
+
+// 矩形
+type React struct{}
+
+func (this *React) ZhouChang(params Params, ret *int) error {
+	*ret = (params.Width + params.Height) * 2
+	return nil
+}
+
+func (this *React) MianJi(params Params, ret *int) error {
+	*ret = params.Width * params.Height
+	return nil
+}
+
+func main() {
+	http.HandleFunc("/panda", pandaFunc)
+	//注册服务
+	react := new(React)
+	rpc.Register(react)
+	//HTTP绑定
+	rpc.HandleHTTP()
+	http.ListenAndServe("127.0.0.1:8888", nil)
+}
+
+func pandaFunc(writer http.ResponseWriter, request *http.Request) {
+	io.WriteString(writer, "Hello,World!!!")
+}
+```
+
+#### 客户端
+
+```go
+package main
+
+import (
+	"fmt"
+	"net/rpc"
+)
+
+// 传的参数
+type Params struct {
+	Width, Height int
+}
+
+// rpc客户端
+func main() {
+	client, e := rpc.DialHTTP("tcp", "127.0.0.1:8888")
+	if e != nil {
+		fmt.Println("Dial HTTP Error:", e)
+		return
+	}
+	zhouchang := 0
+	e = client.Call("React.ZhouChang", Params{10, 20}, &zhouchang)
+	if e != nil {
+		fmt.Println("React.ZhouChang Error:", e)
+		return
+	}
+	fmt.Println("矩形的周长是：", zhouchang)
+	mianji := 0
+	e = client.Call("React.MianJi", Params{10, 20}, &mianji)
+	if e != nil {
+		fmt.Println("React.MianJi Error:", e)
+		return
+	}
+	fmt.Println("矩形的面积是：", mianji)
+}
+```
+
 - 官方还提供了net/rpc/jsonrpc库实现RPC方法，jsonrpc采用encoding/json进行数据编解码，因而支持跨语言调用，目前jsonrpc库是基于tcp协议实现的，暂不支持http传输方式。[json字符串]
+
+#### 服务端
+
+```go
+package main
+
+import (
+	"fmt"
+	"net"
+	"net/rpc"
+	"net/rpc/jsonrpc"
+)
+
+// 参数
+type Params struct {
+	Width  int
+	Height int
+}
+
+// 矩形
+type React struct{}
+
+func (this *React) ZhouChang(params Params, ret *int) error {
+	*ret = (params.Width + params.Height) * 2
+	return nil
+}
+
+func (this *React) MianJi(params Params, ret *int) error {
+	*ret = params.Width * params.Height
+	return nil
+}
+
+func main() {
+	//注册服务
+	react := new(React)
+	rpc.Register(react)
+	listener, e := net.Listen("tcp", "127.0.0.1:9999")
+	if e != nil {
+		fmt.Println("Net Listen Error:", e)
+		return
+	}
+	for {
+		// 监听客户端连接
+		conn, e := listener.Accept()
+		if e != nil {
+			fmt.Println("Listener Accept Error:", e)
+			return
+		}
+		go jsonrpc.ServeConn(conn)
+	}
+}
+```
+
+#### 客户端
+
+```go
+package main
+
+import (
+	"fmt"
+	"net/rpc/jsonrpc"
+)
+
+// 传的参数
+type Params struct {
+	Width, Height int
+}
+
+// rpc客户端
+func main() {
+	client, e := jsonrpc.Dial("tcp", "127.0.0.1:9999")
+	if e != nil {
+		fmt.Println("Dial HTTP Error:", e)
+		return
+	}
+	zhouchang := 0
+	e = client.Call("React.ZhouChang", Params{50, 20}, &zhouchang)
+	if e != nil {
+		fmt.Println("React.ZhouChang Error:", e)
+		return
+	}
+	fmt.Println("矩形的周长是：", zhouchang)
+	mianji := 0
+	e = client.Call("React.MianJi", Params{50, 20}, &mianji)
+	if e != nil {
+		fmt.Println("React.MianJi Error:", e)
+		return
+	}
+	fmt.Println("矩形的面积是：", mianji)
+}
+```
 
 ###gRPC
 
 gRPC是一个高性能、开源、通用的RPC框架，底层是通讯协议，采用Protobuf数据序列化协议[protobuf]。
 
+#### 安装gRPC
+```
+go get google.golang.org/grpc
+```
+
+#### gRPC调用流程
+
+    1.编写.proto描述文件
+    2.编译生成.pb.go文件
+    3.服务端实现约定的接口并提供服务
+    4.客户端按照约定调用.pb.go文件中的方法请求服务
+
+#### 项目结构
+
+```shell script
+    |—— hello/
+        |—— client/
+            |—— main.go   // 客户端
+        |—— server/
+            |—— main.go   // 服务端
+    |—— proto/
+        |—— hello/
+            |—— hello.proto   // proto描述文件
+            |—— hello.pb.go   // proto编译后文件
+```
+
+#### 编写.proto描述文件
+
+```shell script
+    syntax = "proto3";
+    option go_package = "./;hello";
+    
+    service Hello{
+       rpc SayHello(HelloRequest) returns (HelloResponse){}
+    }
+    
+    message HelloRequest{
+       string name = 1;
+    }
+    
+    message HelloResponse{
+       string message = 1;
+    }
+```
+
+#### 编译生成.pb.go文件
+
+生成.pb.go时，编译命令使用grpc的插件
+
+```shell script
+protoc --go_out=plugins=grpc:. hello.proto
+```
+
+#### 实现服务端接口 server/main.go
+
+```go
+package main
+
+import (
+	"fmt"
+	"golang.org/x/net/context"
+	"google.golang.org/grpc"
+	"grpc-demo/proto/hello"
+	"net"
+)
+
+type HelloService struct{}
+
+func (h HelloService) SayHello(ctx context.Context, in *hello.HelloRequest) (*hello.HelloResponse, error) {
+	response := new(hello.HelloResponse)
+	response.Message = fmt.Sprintf("Hello %s.", in.Name)
+	return response, nil
+}
+
+func main() {
+	listener, e := net.Listen("tcp", "127.0.0.1:8989")
+	if e != nil {
+		fmt.Println("TCP Listen Error!!!!")
+		return
+	}
+
+	helloService := HelloService{}
+
+	//实例化grpc Server
+	server := grpc.NewServer()
+	// 注册服务
+	hello.RegisterHelloServer(server, helloService)
+
+	server.Serve(listener)
+}
+```
+
+#### 实现客户端调用 client/main.go
+
+```go
+package main
+
+import (
+	"fmt"
+	"golang.org/x/net/context"
+	"google.golang.org/grpc"
+	"grpc-demo/proto/hello"
+)
+
+func main() {
+	conn, e := grpc.Dial( "127.0.0.1:8989",grpc.WithInsecure())
+	if e != nil {
+		fmt.Println("Grpc Dial Error:",e)
+		return
+	}
+	defer conn.Close()
+    //初始化客户端
+	client:= hello.NewHelloClient(conn)
+    //调用方法
+	response, e := client.SayHello(context.Background(), &hello.HelloRequest{Name: "Gopher"})
+	if e != nil {
+		fmt.Println("Client SayHello Error:",e)
+		return
+	}
+
+	fmt.Println("Info:",response.Message)
+
+}
+```
