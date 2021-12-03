@@ -1,5 +1,56 @@
 #  微服务
 
+## 特点
+
+- 在分布式环境中，将单体应用拆分为一系列服务，共同组成整个系统。
+- 每个服务都轻量级，单独部署，运行在自己的进程中。
+- 每个微服务注重自己的核心能力的开发，微服务组件之间采用轻量级通信方式进行通信，包括但不限于RESTful API。
+- 按照业务边界进行划分。
+- 微服务是一种编程架构思想，有不同的语言实现。
+
+## 微服务面临的问题
+
+1、客户端如何访问这些服务？
+
+采用一种叫做网关（英文为API Gateway）的技术方案来解决这些问题，网关的作用主要包括：
+
+    提供统一服务入口，让微服务对前台透明
+    聚合后台的服务，节省流量，提升性能
+    提供安全，过滤，流控等API管理功能
+
+![客户端访问微服务](https://imgconvert.csdnimg.cn/aHR0cHM6Ly9waWM0LnpoaW1nLmNvbS84MC92Mi03YjJmMmMwM2E4ZjI4NTRlZGExNjY1Y2NmYmZiNTVjYl83MjB3LmpwZw?x-oss-process=image/format,png)
+
+2、每个服务之间如何进行通信？
+
+所有的微服务都是独立部署，运行在自己的进程容器中，所以微服务与微服务之间的通信就是IPC（Inter Process Communication），翻译为进程间通信。进程间通信的方案已经比较成熟了，现在最常见的有两大类：同步调用、异步消息调用。
+
+- 同步调用
+
+同步调用比较简单，一致性强，但是容易出调用问题，性能体验上也会差些，特别是调用层次多的时候。同步调用的有两种实现方式：分别是REST和RPC
+
+**REST**：REST基于HTTP，实现更容易，各种语言都支持，同时能够跨客户端，对客户端没有特殊的要求，只要具备HTTP的网络请求库功能就能使用。
+
+**RPC**：rpc的特点是传输效率高，安全性可控，在系统内部调用实现时使用的较多。
+基于REST和RPC的特点，我们通常采用的原则为：向系统外部暴露采用REST，向系统内部暴露调用采用RPC方式。
+
+- 异步消息调用
+
+异步消息的方式在分布式系统中有特别广泛的应用，他既能减低调用服务之间的耦合，又能成为调用之间的缓冲，确保消息积压不会冲垮被调用方，同时能保证调用方的服务体验，继续干自己该干的活，不至于被后台性能拖慢。需要付出的代价是一致性的减弱，需要接受数据最终一致性，所谓的最终一致性就是只可能不会立刻同步完成，会有延时，但是最终会完成数据同步；还有就是后台服务一般要实现幂等性，因为消息送出于性能的考虑一般会有重复（保证消息的被收到且仅收到一次对性能是很大的考验）。最后就是必须引入一个独立的 Broker，作为中间代理池。
+
+3、多个微服务，应如何实现？
+
+ - 服务注册与发现
+
+当服务上线时，服务提供者将自己的服务注册信息注册到某个专门的框架中，并通过心跳维持长链接，实时更新链接信息。服务调用者通过服务管理框架进行寻址，根据特定的算法，找到对应的服务，或者将服务的注册信息缓存到本地，这样提高性能。当服务下线时，服务管理框架会发送服务下线的通知给其他服务。
+
+4、如果服务出现异常宕机，该如何解决？
+
+   - 重试机制
+   - 限流机制
+   - 熔断机制
+   - 负载均衡
+   - 降级机制（本地缓存）
+
 ## ProtoBuf
 
 Protobuf是一种结构化数据的存储格式，平台无关，语言无关，可扩展。
@@ -427,4 +478,149 @@ func main() {
 	fmt.Println("Info:",response.Message)
 
 }
+```
+
+## consul
+
+### consul注册中心
+
+![consul注册中心](https://img-blog.csdnimg.cn/img_convert/314d1ea4d5b4754083c4c0e816349ecf.png)
+
+1、当 Producer 启动的时候，会向 Consul 发送一个 post 请求，告诉 Consul 自己的 IP 和 Port
+
+2、Consul 接收到 Producer 的注册后，每隔10s（默认）会向 Producer 发送一个健康检查的请求，检验Producer是否健康
+
+3、当 Consumer 发送 GET 方式请求 /api/address 到 Producer 时，会先从 Consul 中拿到一个存储服务 IP 和 Port 的临时表，从表中拿到 Producer 的 IP 和 Port 后再发送 GET 方式请求 /api/address
+
+4、该临时表每隔10s会更新，只包含有通过了健康检查的 Producer
+
+
+### consul集群架构图
+
+![consul集群架构图](http://static.bluersw.com/images/spring-cloud-consul-client-25.png)
+
+![consul集群架构图](https://imgconvert.csdnimg.cn/aHR0cHM6Ly9pbWcyMDIwLmNuYmxvZ3MuY29tL2Jsb2cvODI0MjkxLzIwMjAwNC84MjQyOTEtMjAyMDA0MDQyMzE2MDY4NDEtNjkzNTk2MTE5LnBuZw?x-oss-process=image/format,png)
+
+### consul单机版
+
+```shell script
+consul agent -dev
+```
+
+### consul集群版
+
+#### consul服务端1
+```shell script
+consul agent -server -bootstrap-expect 3 -data-dir /tmp/consul -node=n1 -bind=192.168.1.110 -ui -config-dir /etc/config/cosul -rejoin -join 192.168.1.110 -client 127.0.0.1/0.0.0.0
+```
+#### consul服务端2
+```shell script
+consul agent -server -bootstrap-expect 3 -data-dir /tmp/consul -node=n2 -bind=192.168.1.111 -config-dir /etc/config/consul -rejoin -join 192.168.1.110 -client 127.0.0.1/0.0.0.0
+```
+
+#### consul服务端3
+```shell script
+consul agent -server -bootstrap-expect 3 -data-dir /tmp/consul -node=n3 -bind=192.168.1.112 -config-dir /etc/config/consul -rejoin -join 192.168.1.110 -client 127.0.0.1/0.0.0.0
+```
+
+#### consul客户端1
+```shell script
+consul agent -data-dir /tmp/consul -node=n4 -bind=192.168.1.113 -config-dir /etc/config/consul -rejoin -join 192.168.1.110
+```
+
+#### consul客户端2
+```shell script
+consul agent -data-dir /tmp/consul -node=n5 -bind=192.168.1.114 -config-dir /etc/config/consul -rejoin -join 192.168.1.110
+```
+
+## Go-Micro微服务框架
+
+### 环境安装
+
+- 安装go-micro微服务RPC框架
+
+```shell script
+go get github.com/micro/go-micro
+```
+
+- 安装Protobuf
+
+```shell script
+go get -u github.com/golang/protobuf/proto
+go get -u github.com/golang/protobuf/protoc-gen-go
+```
+
+- 安装protoc-gen-micro可执行文件
+
+v1版本：
+```shell script
+go get github.com/micro/protoc-gen-micro
+```
+
+v2版本：
+```shell script
+go get github.com/micro/micro/v2/cmd/protoc-gen-micro
+```
+
+- 安装micro工具包,生成micro可执行文件
+
+方式1：
+
+```shell script
+go get github.com/micro/micro
+```
+
+方式2：使用源码包进行go build编译安装
+
+### 安装出现的问题
+
+- 使用micro/v2时,protoc生成micro.protoc文件导致的版本冲突 
+
+可将生成的*.pb.micro.go文件中的v1依赖改为v2依赖即可
+
+```shell script
+import (
+	context "context"
+	client "github.com/micro/go-micro/v2/client"
+	server "github.com/micro/go-micro/v2/server"
+)
+``` 
+
+- micro/v2版本使用consul作为注册中心，默认使用mdns
+
+```shell script
+2021-12-02 09:40:28.278823 I | Transport [http] Listening on [::]:65258
+
+2021-12-02 09:40:28.278823 I | Broker [http] Connected to [::]:65259
+
+2021-12-02 09:40:28.451945 I | Registry [consul] Registering node: go.micro.service.hello-c79e1fee-5f0d-4461-a56b-ca9552be4ad3
+
+2021-12-02 09:40:29.150437 I | Subscribing go.micro.service.hello-c79e1fee-5f0d-4461-a56b-ca9552be4ad3 to topic: go.micro.service.hello
+
+```
+
+### 微服务小案例
+
+1. 生成服务端骨架、客户端骨架
+
+- v1版本
+```shell script
+micro new --gopath=false --type="srv" hello
+micro new --gopath=false --type="web" web
+```
+
+- v2版本
+```shell script
+micro new --gopath=false --type="service" hello
+micro new --gopath=false --type="web" web
+```
+
+2.生成protobuf
+```shell script
+protoc --micro_out=. --go_out=. proto/hello/hello.proto
+```
+
+3.启用web面板查看服务
+```shell script
+micro web
 ```
