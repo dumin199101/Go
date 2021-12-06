@@ -622,8 +622,36 @@ micro new --gopath=false --type="web" web
 protoc --micro_out=. --go_out=. proto/hello/hello.proto
 ```
 
-3.启用web面板查看服务
+3.启用web面板查看服务【服务治理】
 ```shell script
-micro web
+micro --registry=etcd --registry_address=127.0.0.1:2379 web
+```
+
+4.查看服务列表
+```shell script
+micro --registry etcd --registry_address 127.0.0.1:2379 list services
+```
+
+### 使用etcd做注册中心
+
+#### 启动etcd
+
+```shell script
+./etcd  --data-dir ./data.etcd/  --listen-client-urls http://yourip:2379 --advertise-client-urls http://yourip:2379 & >./log/etcd.log
+```
+
+-listen-client-urls用于指定etcd和客户端的连接端口
+
+-advertise-client-urls用于指定etcd服务器之间通讯的端口
+
+etcd有要求，如果-listen-client-urls被设置了，那么就必须同时设置-advertise-client-urls，所以即使设置和默认相同，也必须显式设置.
+
+
+```shell script
+2021-12-06 15:02:30  file=v2@v2.9.1/service.go:200 level=info Starting [service] go.micro.service.hello
+2021-12-06 15:02:30  file=grpc/grpc.go:864 level=info Server [grpc] Listening on [::]:63232
+2021-12-06 15:02:30  file=grpc/grpc.go:881 level=info Broker [http] Connected to 127.0.0.1:63233
+2021-12-06 15:02:30  file=grpc/grpc.go:697 level=info Registry [etcd] Registering node: go.micro.service.hello-8bebc6e1-107f-49db-a4c6-063e7ba9509e
+2021-12-06 15:02:30  file=grpc/grpc.go:730 level=info Subscribing to topic: go.micro.service.hello
 ```
 
