@@ -601,6 +601,8 @@ import (
 
 ### 微服务小案例
 
+0. go-micro v2 默认是 **GRPC** 通信
+
 1. 生成服务端骨架、客户端骨架
 
 - v1版本
@@ -624,3 +626,4 @@ protoc --micro_out=. --go_out=. proto/hello/hello.proto
 ```shell script
 micro web
 ```
+

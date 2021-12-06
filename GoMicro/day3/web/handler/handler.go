@@ -21,6 +21,7 @@ func WebCall(w http.ResponseWriter, r *http.Request) {
 	// call the backend service
 	webClient := hello.NewHelloService("go.micro.service.hello", client.DefaultClient)
 	rsp, err := webClient.Call(context.TODO(), &hello.Request{
+		// 接口断言
 		Name: request["name"].(string),
 	})
 	if err != nil {
