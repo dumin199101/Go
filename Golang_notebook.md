@@ -1,25 +1,46 @@
 # Golang 笔记
 
 1.float32跟float64默认零值为0
+
 2.字符类型用byte表示，原样输出只能用格式化c%的形式
+
 3.布尔类型格式化输出t%，类型T%
+
 4.整数如果不指定类型为int，根据系统代表的是int32或者int64，rune类型代表的是int32
+
 5.字符串不可变代表的是字符不可变，不能用str[0]=e的方式重新赋值，可以通过强转转换成byte或rune数组在修改！
+
 6.强制类型转换T(v)
+
 7.基本数据类型转换为字符串：1.sprintf里边的是变量的类型2.strconv，q%代表加双引号输出变量，FormatFloat第二个参数代表的是格式，'f'代表十进制形式，第三个参数代表小数点后位数，第四个参数代表Float变量是32还是64位，ParseFloat类型的函数，返回值有两个，第二个代表转换产生的错误，可不接收，第二个参数代表的是转换后的位数32或者64，ParseInt第二个参数代表的是进制，第三个代表的是转换后的位数
-8.指针:一定是一个地址值，基本数据类型都有对应的指针类型，＆age可以拿到内存地址，*ptr可以拿到变量对应的值
+
+8.指针:一定是一个地址值，基本数据类型都有对应的指针类型，＆age可以拿到内存地址，*ptr可以拿到变量对应的值*
+
 9.算数运算符，10/3结果为整数，10.0/3结果为浮点数，取余a%b=a-a/b*b，在go中只有a++，代表的是自增一！
+
 10.键盘录入，使用的是fmt包下的Scanln或者Scanf，可以单个录入，或者同时录入，使用空格分隔即可
+
 11.流程控制:使用if i:=1;i >0{}，for {}可以执行死循环，for循环对字节就行遍历，for-range对字符进行遍历
+
 12.break跟continue配合lable在双重循环中使用，注意区别
+
 13.goto 配合lable标签使用，跳过某些逻辑，但不建议使用，容易造成混乱，return也可以用在流程控制中
+
 14.函数返回值只有一个时，返回值列表可以省略括号，值传递内存分析图，函数可变参数三个点在数据类型前边，函数支持返回值命名：在函数体中直接return，在返回值列表中(sub int,sum int)！
+
 15.Go中基础类型跟复合类型(数组跟结构体)是值传递，引用类型是地址传递
+
 16.init函数执行顺序:当导入一个包时，会执行这个包中的全局变量、函数定义、及init函数，然后执行本包中的全局变量、函数、及init函数，最后执行main函数
+
 17.闭包=返回的匿名函数+匿名函数以外的变量，这个变量会一直存在在内存中，供我们使用，但不能滥用闭包！
+
 18.defer关键字:函数执行完毕之后释放资源，按照先进后出的顺序执行defer栈
-19.字符串相关函数：统计长度：内置函数len，按照字节进行统计，所有的内置函数都在builtin包中,遍历字符串:[]rune，字符串转整数strconv.Atoi,整数转字符串strconv.Itoa，
-字符串是否包含子串strings.Contains,子串第一次出现的位置strings.Index，忽略大小写比较strings.EqualFold，子串出现的次数strings.Count，分割字符串strings.Split，替换字符串strings.Replace最后一个参数是-1代表全部替换，strings.ToLower跟ToUpper，strings.Trim跟TrimSpace，TrimLeft，TrimRight，HasPrefix跟HasSuffix
+
+19.字符串相关函数：统计长度：内置函数len，按照字节进行统计，所有的内置函数都在builtin包中,遍历字符串:[]rune，字符串转整数strconv.Atoi,整数转字符串strconv.Itoa，字符串是否包含子串strings.Contains,子串第一次出现的位置strings.Index，忽略大小写比较strings.EqualFold，子串出现的次数strings.Count，分割字符串strings.Split，替换字符串strings.Replace最后一个参数是-1代表全部替换，strings.ToLower跟ToUpper，strings.Trim跟TrimSpace，TrimLeft，TrimRight，HasPrefix跟HasSuffix
+
 20.时间日期函数，time.Now()返回的是一个time.Time的结构体，通过这个变量可以获取年月日时分秒，另外可以通过Format跟Parse实现日期与字符串类型的互转
+
 21.内置函数:new(int)返回一个对应类型的指针，make ()返回的是引用类型本身
+
 22.defer匿名函数+recover内建函数可以处理异常，保证程序正常执行下边的流程，自定义错误使用errors.New()抛出error，调用者接收之后，可以使用panic()终止程序执行，通过recover可以收集到panic的异常，保证程序正常执行！
+
