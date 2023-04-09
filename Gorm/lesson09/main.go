@@ -73,4 +73,14 @@ func main() {
 	// SELECT * FROM users OFFSET 5 LIMIT 10;
 	fmt.Println(users3)
 
+	// 打印sql
+	statement := db.Session(&gorm.Session{DryRun: true}).First(&UserInfo{}, map[string]interface{}{"name": "jinzhu"}).Statement
+	println(statement.SQL.String())
+	println(statement.Vars)
+	println(db.Dialector.Explain(statement.SQL.String(), statement.Vars))
+
+	sql := db.ToSQL(func(tx *gorm.DB) *gorm.DB {
+		return tx.First(&UserInfo{}, map[string]interface{}{"name": "jinzhu"})
+	})
+	println(sql)
 }
